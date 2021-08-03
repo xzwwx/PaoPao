@@ -1,17 +1,19 @@
 package main
 
 import (
-	"base/gonet"
-	"glog"
-	"google.golang.org/genproto/googleapis/ads/googleads/v3/common"
+	"PaoPao/server-base/src/base/gonet"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/golang/glog"
+
+	"google.golang.org/genproto/googleapis/ads/googleads/v3/common"
 )
 
 const (
 	Task_Max_Timeout = 1
-	OpsPerSecond = 12
+	OpsPerSecond     = 12
 )
 
 type PlayerTask struct {
@@ -19,42 +21,41 @@ type PlayerTask struct {
 	//udptask *snet.Session
 	isUdp bool
 
-	key string
-	id uint64
-	name string
-	room *Room
+	key   string
+	id    uint64
+	name  string
+	room  *Room
 	udata *common.UserData
 	uobjs []uint32
 
-	power uint32
-	speed uint32
+	power   uint32
+	speed   uint32
 	lifenum uint32
-	state uint32
+	state   uint32
 
-	activeTime	time.Time
-	onlineTime	int64
-
+	activeTime time.Time
+	onlineTime int64
 }
 
 type PlayerOpType int
 
 const (
-	PlayerNoneOp 	= PlayerOpType(iota)
+	PlayerNoneOp = PlayerOpType(iota)
 	PlayerMoveOp
 	PlayerLayBombOp
 	PlayerCombineOp
 )
 
 type PlayerOp struct {
-	player  	*PlayerTask
-	cmdParam	uint32
-	opType 		PlayerOpType
-	loginUsers	map[uint64]bool
-	toPlayerId	uint64
-	Opts 		*UserOpt
+	player     *PlayerTask
+	cmdParam   uint32
+	opType     PlayerOpType
+	loginUsers map[uint64]bool
+	toPlayerId uint64
+	Opts       *UserOpt
 }
 
-func NewPlayerTask(conn net.Conn) *PlayerTask{
+func NewPlayerTask(conn net.Conn) *PlayerTask {
 	s := &PlayerTask{
 		tcptask:    gonet.NewTcpTask(conn),
 		activeTime: time.Now(),
@@ -67,8 +68,6 @@ func NewPlayerTask(conn net.Conn) *PlayerTask{
 
 func (this *PlayerTask) ParseMsg(data []byte, flag byte) bool {
 
-
-
 	return true
 }
 
@@ -76,7 +75,7 @@ func (this *PlayerTask) OnClose() {
 
 }
 
-func (this *PlayerTask) Start(){
+func (this *PlayerTask) Start() {
 	if !this.isUdp {
 		this.tcptask.Start()
 	}
@@ -85,16 +84,11 @@ func (this *PlayerTask) Start(){
 func (this *PlayerTask) Stop() bool {
 	if this.isUdp {
 		return true
-	}else{
+	} else {
 		this.tcptask.Close()
 	}
 	return true
 }
-
-
-
-
-
 
 //////////////////PlayerTask Manager//////////
 type PlayerTaskMgr struct {
@@ -115,8 +109,7 @@ func PlayerTaskMgr_GetMe() *PlayerTaskMgr {
 }
 
 // Depose player timeout
-func (this *PlayerTaskMgr) timeAction(){
-
+func (this *PlayerTaskMgr) timeAction() {
 
 }
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"base/env"
-	"base/gonet"
+	"PaoPao/server-base/src/base/env"
+	"PaoPao/server-base/src/base/gonet"
 	"flag"
 	"glog"
 	"math/rand"
@@ -14,16 +14,16 @@ const (
 	TokenRedis int = iota
 )
 
-type RoomServer struct{
+type RoomServer struct {
 	gonet.Service
-	roomser 	*gonet.TcpServer
+	roomser *gonet.TcpServer
 	//roomserUdp 	*snet.Server
 	version uint32
 }
 
 var serverm *RoomServer
 
-func RoomServer_GetMe() *RoomServer{
+func RoomServer_GetMe() *RoomServer {
 	if serverm == nil {
 		serverm = &RoomServer{
 			roomser: &gonet.TcpServer{},
@@ -50,7 +50,6 @@ func (this *RoomServer) Init() bool {
 
 	//Redis
 
-
 	// Binding Local Port
 	err := this.roomser.Bind(env.Get("room", "listen"))
 	if err != nil {
@@ -58,9 +57,8 @@ func (this *RoomServer) Init() bool {
 		return false
 	}
 
-
 	//
-	if !RCenterClient_GetMe().Connect(){
+	if !RCenterClient_GetMe().Connect() {
 		return false
 	}
 
@@ -82,7 +80,6 @@ func (this *RoomServer) MainLoop() {
 
 func (this *RoomServer) Final() bool {
 
-
 	return true
 }
 
@@ -91,14 +88,14 @@ func (this *RoomServer) Reload() {
 }
 
 var (
-	logfile = flag.String("logfile", "","Log file name")
-	config = flag.String("config", "config.json","config path")
+	logfile = flag.String("logfile", "", "Log file name")
+	config  = flag.String("config", "config.json", "config path")
 )
 
 func main() {
 	flag.Parse()
 
-	if !env.Load(*config){
+	if !env.Load(*config) {
 		return
 	}
 
@@ -114,10 +111,10 @@ func main() {
 
 	rand.Seed(time.Now().Unix())
 
-	if *logfile != ""{
+	if *logfile != "" {
 		glog.SetLogFile(*logfile)
-	}else{
-		glog.SetLogFile(env.Get("room","log"))
+	} else {
+		glog.SetLogFile(env.Get("room", "log"))
 	}
 
 	defer glog.Flush()

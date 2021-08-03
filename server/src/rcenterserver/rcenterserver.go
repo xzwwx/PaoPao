@@ -1,37 +1,37 @@
 package main
 
 import (
-	//"base/env"
-	"base/rpc"
+	"net/rpc"
 	"time"
 
-	"base/gonet"
-	//"bytes"
+	"PaoPao/server-base/src/base/env"
+	"PaoPao/server-base/src/base/gonet"
 	"flag"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"glog"
 	"strconv"
 
-	//"google.golang.org/genproto/googleapis/ads/googleads/v3/common"
-	"log"
+	"github.com/golang/glog"
+	"github.com/golang/protobuf/proto"
+
+	"PaoPao/server/src/usercmd"
 	"net"
-	"usercmd"
 )
 
 type RCenterServer struct {
 	gonet.Service
-	rpcser 	*gonet.TcpServer
-	sockser	*gonet.TcpServer
+	rpcser  *gonet.TcpServer
+	sockser *gonet.TcpServer
 }
 
 var serverm *RCenterServer
+
+const RpcServiceName = "RetInfoRoom"
 
 func RCenterServer_GetMe() *RCenterServer {
 	if serverm == nil {
 		serverm = &RCenterServer{
 			rpcser:  &gonet.TcpServer{},
-			sockser:  &gonet.TcpServer{},
+			sockser: &gonet.TcpServer{},
 		}
 		serverm.Derived = serverm
 	}
@@ -42,62 +42,51 @@ func RCenterServer_GetMe() *RCenterServer {
 type RetIntoRoom struct {
 }
 
-func (q *RetIntoRoom) RetRoom(request *usercmd.ReqIntoRoom, reply *usercmd.RetIntoFRoom) error{
+func (q *RetIntoRoom) RetRoom(request *usercmd.ReqIntoRoom, reply *usercmd.RetIntoFRoom) error {
 
 	fmt.Println("Into RPC...")
 
 	uid := request.GetUId()
 	username := request.UserName
 	fmt.Println(strconv.FormatInt(int64(uid), 10))
-	fmt.Println(*username,"66666666")
+	fmt.Println(*username, "66666666")
 
 	reply.Err = proto.Uint32(uint32(0))
 	reply.RoomId = proto.Uint32(uint32(107))
 	reply.Addr = proto.String("127.0.0.1:9494")
 
-	reply.Key = proto.String(strconv.FormatInt(int64(uid), 10)+*username)
+	reply.Key = proto.String(strconv.FormatInt(int64(uid), 10) + *username)
 
 	fmt.Println("Out RPC")
 
 	return nil
 }
 
-func Acc(listener net.Listener){
+func Acc(listener net.Listener) {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Fatal("Accept error:", err)
+			glog.Errorln("[RCenterServer] accept error:", err)
+			continue
 		}
-		fmt.Println("Accept success...")
 		go rpc.ServeConn(conn)
-		fmt.Println("Server success...")
 	}
 }
-/////////
 
-func (this * RCenterServer) Init() bool{
-
-
-	rpc.RegisterName("RetIntoRoom", new(RetIntoRoom))
-	fmt.Println("RegisterName success...")
-	listener, err := net.Listen("tcp", ":9099")
-	fmt.Println("Listen success...")
-
+func (this *RCenterServer) Init() bool {
+	rpc.RegisterName(RpcServiceName, new(RetIntoRoom))
+	listener, err := net.Listen("tcp", env.Get("rcenter", "server"))
 	if err != nil {
-		log.Fatal("ListenTCP error:", err)
+		glog.Errorln("[RCenterServer] listen error:", err)
+		return false
 	}
 	go Acc(listener)
-
-	fmt.Println("Init success.")
 	return true
 }
 
-func (this *RCenterServer) MainLoop() {
-	time.Sleep(time.Second)
-}
+//
 
 func (this *RCenterServer) Final() bool {
-
 	return true
 }
 
@@ -105,37 +94,17 @@ func (this *RCenterServer) Reload() {
 
 }
 
-var (
-	logfile = flag.String("logfile", "","Log file name")
-	config = flag.String("config", "config.json","config path")
-)
+func (this *RCenterServer) MainLoop() {
+	time.Sleep(time.Second)
+}
+
+var config = flag.String("config", "", "config path")
 
 func main() {
-	//flag.Parse()
-	//
-	//if !env.Load(*config){
-	//	return
-	//}
-	//loglevel := env.Get("global", "loglevel")
-	//if loglevel != "" {
-	//	flag.Lookup("stderrthreshold").Value.Set(loglevel)
-	//}
-	//
-	//logtostderr := env.Get("global", "logtostderr")
-	//if loglevel != "" {
-	//	flag.Lookup("logtostderr").Value.Set(logtostderr)
-	//}
-	//
-	//if *logfile != ""{
-	//	glog.SetLogFile(*logfile)
-	//}else{
-	//	glog.SetLogFile(env.Get("rcenter","log"))
-	//}
-	//
-	//defer glog.Flush()
-
+	flag.Parse()
+	env.Load(*config)
+	defer glog.Flush()
 	RCenterServer_GetMe().Main()
 
 	glog.Info("[Close] RCenterServer closed.")
 }
-

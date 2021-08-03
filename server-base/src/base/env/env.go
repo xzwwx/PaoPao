@@ -2,8 +2,9 @@ package env
 
 import (
 	"encoding/json"
-	"glog"
 	"io/ioutil"
+
+	"github.com/golang/glog"
 )
 
 var configData map[string]map[string]string
@@ -11,7 +12,7 @@ var configData map[string]map[string]string
 func Load(path string) bool {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		glog.Error("[Config] Load error.", path, ", ", err )
+		glog.Error("[Config] Load error.", path, ", ", err)
 		return false
 	}
 	err = json.Unmarshal(file, &configData)
@@ -21,7 +22,6 @@ func Load(path string) bool {
 	}
 	return true
 }
-
 
 func Get(table, key string) string {
 	t, ok := configData[table]

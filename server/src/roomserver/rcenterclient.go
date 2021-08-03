@@ -1,32 +1,33 @@
 package main
 
 import (
-	"base/env"
-	"base/gonet"
-	"common"
+	"PaoPao/server-base/src/base/env"
+	"PaoPao/server-base/src/base/gonet"
+	"PaoPao/server/src/common"
+	"PaoPao/server/src/usercmd"
+
+	"github.com/golang/glog"
+
 	"github.com/golang/protobuf/proto"
-	"glog"
-	"usercmd"
 )
 
 type RCenterClient struct {
 	task *gonet.TcpTask
-	Id 	 uint16
+	Id   uint16
 }
 
 var lclientm *RCenterClient
 
 func RCenterClient_GetMe() *RCenterClient {
 	if lclientm == nil {
-		lclientm = &RCenterClient{
-		}
+		lclientm = &RCenterClient{}
 	}
 	return lclientm
 }
 
 func (this *RCenterClient) Connect() bool {
 
-	loginaddr := env.Get("room","rcenter")
+	loginaddr := env.Get("room", "rcenter")
 	mclient := &gonet.TcpClient{}
 	conn, err := mclient.Connect(loginaddr)
 	if err != nil {
@@ -42,7 +43,7 @@ func (this *RCenterClient) Connect() bool {
 
 	this.SendCmd(usercmd.CmdType_Login, &usercmd.ReqServerLogin{
 		Address: (env.Get("room", "local")),
-		Key: 	 (env.Get("room","key")),
+		Key:     (env.Get("room", "key")),
 		SerType: (common.ServerTypeRoom),
 		NewSync: (true),
 	})
@@ -51,10 +52,7 @@ func (this *RCenterClient) Connect() bool {
 	return true
 }
 
-
 func (this *RCenterClient) ParseMsg(data []byte, flag byte) bool {
-
-
 
 	return true
 }
@@ -63,13 +61,11 @@ func (this *RCenterClient) OnClose() {
 
 }
 
-
-
 /////////////////////////////////////
-func (this *RCenterClient) SendCmd(cmd usercmd.CmdType, msg []byte) bool {		//common.Message is an interface which is used ot Encode/Decode message
+func (this *RCenterClient) SendCmd(cmd usercmd.CmdType, msg []byte) bool { //common.Message is an interface which is used ot Encode/Decode message
 	//Encode
-	data, flag, err := common.EncodeGoCmd(uint16(cmd), msg)		///-----------------------
-	if err != nil{
+	data, flag, err := common.EncodeGoCmd(uint16(cmd), msg) ///-----------------------
+	if err != nil {
 		glog.Info("[Service] Send Failed.", cmd, ", len:", len(data), ", err:", err)
 		return false
 	}
@@ -78,40 +74,41 @@ func (this *RCenterClient) SendCmd(cmd usercmd.CmdType, msg []byte) bool {		//co
 
 	return true
 }
+
 /////////////////////////////////////
 
 func (this *RCenterClient) SendCmdToServer(serverid uint16, cmd usercmd.CmdType, msg proto.Message) bool {
 	data, flag, err := common.EncodeCmd(uint16(cmd), msg)
-	if err != nil{
+	if err != nil {
 		glog.Info("[Service] Send Failed.", cmd, ", len:", len(data), ", err:", err)
 		return false
 	}
 	reqCmd := &usercmd.S2SCmd{
 		ServerId: uint32(serverid),
-		Flag: (uint32(flag)),
-		Data: data,
+		Flag:     (uint32(flag)),
+		Data:     data,
 	}
 	return this.SendCmd(usercmd.CmdType_S2S, reqCmd)
 }
+
 /////////////////////////////////////////////
 
-
-func (this *RCenterClient) GetId() uint16{
+func (this *RCenterClient) GetId() uint16 {
 	return this.Id
 }
 
 func (this *RCenterClient) AddRoom(roomtype, roomid, endtime uint32, robot uint32) bool {
 	reqCmd := &usercmd.ReqAddRoom{
 		RoomType: roomtype,
-		RoomId: roomid,
-		EndTime: endtime,
+		RoomId:   roomid,
+		EndTime:  endtime,
 	}
 	return this.SendCmd(usercmd.CmdType_AddRoom, reqCmd)
 }
 func (this *RCenterClient) RemoveRoom(roomtype, roomid uint32, iscustom bool) bool {
 	reqCmd := &usercmd.ReqRemoveRoom{
 		//RoomType: roomtype,
-		RoomId: roomid,
+		RoomId:   roomid,
 		IsCustom: iscustom,
 	}
 	return this.SendCmd(usercmd.CmdType_RemoveRoom, reqCmd)
@@ -138,8 +135,6 @@ func (this *RCenterClient) UpdateServer(roomnum, usernum int32) bool {
 	reqCmd := &usercmd.ReqUpdateServer{
 		RoomNum: (uint32(roomnum)),
 		UserNum: (uint32(usernum)),
-
 	}
 	return this.SendCmd(usercmd.CmdType_UpdateServer, reqCmd)
 }
-
