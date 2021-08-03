@@ -4,10 +4,11 @@ import (
 	"PaoPao/server-base/src/base/env"
 	"PaoPao/server-base/src/base/gonet"
 	"flag"
-	"glog"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/golang/glog"
 )
 
 const (
@@ -110,12 +111,6 @@ func main() {
 	}
 
 	rand.Seed(time.Now().Unix())
-
-	if *logfile != "" {
-		glog.SetLogFile(*logfile)
-	} else {
-		glog.SetLogFile(env.Get("room", "log"))
-	}
 
 	defer glog.Flush()
 
