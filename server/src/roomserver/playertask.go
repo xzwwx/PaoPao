@@ -2,13 +2,13 @@ package main
 
 import (
 	"PaoPao/server-base/src/base/gonet"
+	"PaoPao/server/src/common"
+	"PaoPao/server/src/usercmd"
 	"net"
 	"sync"
 	"time"
 
 	"github.com/golang/glog"
-
-	"google.golang.org/genproto/googleapis/ads/googleads/v3/common"
 )
 
 const (
@@ -67,6 +67,23 @@ func NewPlayerTask(conn net.Conn) *PlayerTask {
 }
 
 func (this *PlayerTask) ParseMsg(data []byte, flag byte) bool {
+
+	this.activeTime = time.Now()
+
+	cmd := usercmd.MsgTypeCmd(common.GetCmd(data))
+	if this.tcptask.IsVerified() {
+		switch cmd {
+		case usercmd.MsgTypeCmd_Move: // 移动
+			// TODO
+		case usercmd.MsgTypeCmd_PutBomb: // 放炸弹
+			// TODO
+		case usercmd.MsgTypeCmd_Death: // 死亡
+			// TODO
+		case usercmd.MsgTypeCmd_HeartBeat: // 心跳
+			// TODO
+		default:
+		}
+	}
 
 	return true
 }

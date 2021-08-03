@@ -1,24 +1,26 @@
 syntax = "proto3";
 package usercmd;
-import "base_go.proto";
 
 option go_package = "./;usercmd";
 
+// 客户端发送的消息类型***
 enum MsgTypeCmd {
-  None1          = 0;
-  Login1         = 1;    //--++++++++++++++++
-  AddPlayer     = 3;
-  RemovePlayer  = 4;
-  Scene         = 5;
-  Move          = 6;
-  LayBomb       = 7;  // = Break
-  Death         = 10;
-  EndRoom       = 11;
+  None          = 0;  // 占位
+  Login         = 1;  // 登录
+  Top           = 2;  // 排行榜
+  AddPlayer     = 3;  // 添加玩家
+  RemovePlayer  = 4;  // 删除玩家
+  Scene         = 5;  // 更新场景数据
+  Move          = 6;  // 移动***
+  PutBomb       = 7;  // 放炸弹***
+
+  Death         = 10; // 死亡***
+  EndRoom       = 11; 
   NewScene      = 13;
   ReSetNet      = 15;
-  HeartBeat1     = 16;    //++++++++++++++
-  BeBomb        = 21; // = BeBreak
-  SystemMsg     = 22;
+  HeartBeat     = 16; // 心跳***
+
+  SystemMsg     = 22; // 消息通报
 
   ErrorMsg      = 23;
 

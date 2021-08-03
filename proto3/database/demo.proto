@@ -1,6 +1,0 @@
-syntax = "proto3";
-package usercmd;
-option go_package = "./";
-message String {
-  string value = 1;
-}
