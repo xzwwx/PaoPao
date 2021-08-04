@@ -75,6 +75,10 @@ func Acc(listener net.Listener) {
 
 func (this *RCenterServer) Init() bool {
 	rpc.RegisterName(RpcServiceName, new(RetIntoRoom))
+	
+	// rcenter注册rpctask 处理rpc请求
+	rpc.RegisterName("RPCTask", new(RPCTask))
+	
 	listener, err := net.Listen("tcp", env.Get("rcenter", "server"))
 	if err != nil {
 		glog.Errorln("[RCenterServer] listen error:", err)
