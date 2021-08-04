@@ -28,6 +28,19 @@ func (this *LogicServer) Init() bool {
 		glog.Errorln("[LogicServer Init] Init error")
 		return false
 	}
+	
+	
+	// Start RPC
+	HandleLogic := new(RPCLogicTask)
+
+	// 处理游戏命令，比如加入房间、开始游戏等
+	http.Handle("/game", HandleLogic)
+	fmt.Println("------Handle ok")
+	// 
+	listen := env.Get("logic", "listen")
+	go http.ListenAndServe(listen, nil)
+
+	
 	glog.Errorln("[LogicServer Init] Init success")
 	return true
 }
