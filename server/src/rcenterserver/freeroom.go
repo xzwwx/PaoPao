@@ -118,7 +118,8 @@ func (this *FreeRoomMgr) GetRoom(userid uint64) *SortRoom {
 	//roomnum := len(this.rooms)
 	for rid, room := range this.rooms {
 		if room.EndTime <= nowTime {
-			delete(this.rooms, rid)
+			//暂时没用
+			//delete(this.rooms, rid)
 		}
 		if room.RUserNum >= MAX_ROOM_SNUM { // Full
 			continue
