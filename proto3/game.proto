@@ -71,7 +71,7 @@ message MsgLoginResult {
   uint64 id           = 2;
   string name         = 3;
   repeated MsgPlayer others = 4;
-  repeated MsgBall balls = 5;
+  repeated MsgBomb balls = 5;
   uint32 time         = 6;
   uint32 frame        = 7;
   uint32 Local        = 8;
@@ -100,16 +100,12 @@ message MsgLoginResult {
 
 
 // Bomb Ball
-message MsgBall{
+message MsgBomb{
   uint32 id           = 1;
-  int32 type          = 2;
   uint64 own          = 3;
-  uint32 score        = 4;  // power
   int32 x             = 6;
   int32 y             = 7;
-  int32 nx            = 8;  //next x
-  int32 ny            = 9;
-  uint32 PreId        = 10;
+  bool isDelete        = 10;
   uint32 DecayTime    = 12; //bomb time
 
 }
@@ -150,7 +146,7 @@ message MsgRemovePlayer{
 
 // Move request
 message MsgMove{
-  int32 way = 1;    // direction
+  int32 direction = 1;    // direction
   int32 speed = 2;  // = power
 }
 
