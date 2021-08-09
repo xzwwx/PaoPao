@@ -72,7 +72,7 @@ func (this *Scene) UpdatePlayers(per float64) {
 }
 
 // Check mapcell   0: null  1:wall  2:Obstacle
-func (this *Scene) GetCellState(x, y uint32) int32 {
+func (this *Scene) GetCellState(x, y float64) int32 {
 
 	return this.gameMap.gamemap[x][y]
 }
