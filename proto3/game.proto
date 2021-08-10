@@ -1,0 +1,136 @@
+syntax = "proto3";
+package usercmd;
+
+option go_package = "./;usercmd";
+
+// 客户端发送的消息类型***
+enum MsgTypeCmd {
+    None          = 0;  // 占位
+    Login         = 1;  // 登录
+    Top           = 2;  // 排行榜
+    AddPlayer     = 3;  // 添加玩家
+    RemovePlayer  = 4;  // 删除玩家
+    Scene         = 5;  // 更新场景数据
+    Move          = 6;  // 移动***
+    PutBomb       = 7;  // 放炸弹***
+  
+    Death         = 10; // 死亡***
+    EndRoom       = 11; 
+    NewScene      = 13;
+    ReSetNet      = 15;
+    HeartBeat     = 16; // 心跳***
+  
+    SystemMsg     = 22; // 消息通报
+  
+    ErrorMsg      = 23;
+    PlayerState   = 72; // 玩家状态
+    SceneSync     = 100;
+    InitSyncData  = 101;
+    AddPlayers    = 102;
+    AddBalls      = 104;
+    RemoveBalls   = 105;
+    SetSceneData  = 106;
+    CheckSyncData = 108;
+    SetPlayerAttrs= 109;
+  
+    UserStateSet  = 111;
+    UserStateClr  = 112;
+  
+}
+
+message UserLoginInfo {
+    string Token = 1;
+}
+
+message MsgPlayer {
+    uint64  id      = 1;  // 玩家ID
+    string  name    = 2;  // 玩家名字
+    uint32  score   = 3;  // 分数
+    uint32  hp      = 4;  // 生命值
+    uint32  curbomb = 5;  // 当前已经放置的炸弹数量
+    uint32  maxbomb = 6;  // 能放置的最大炸弹数量
+    uint32  power   = 7;  // 炸弹威力
+    uint32  speed   = 8;  // 移动速度
+    int32   posX    = 9;  // 位置x
+    int32   posY    = 10; // 位置y
+}
+
+// 炸弹
+message BombData {
+    uint32 id       = 1;  // id
+    int32  posX     = 2;  // 位置x
+    int32  posY     = 3;  // 位置y
+    uint32 power    = 4;  // 威力
+    uint64 owner    = 5;  // 炸弹所有者
+    uint32 existTm  = 6;  // 存在时间
+}
+
+// ---------------------------请求------------------------------ // 
+
+// 请求移动
+message MsgMove {
+    int32 way = 1;  // 方向
+}
+
+// 请求放置炸弹（tmp）
+message MsgPutBomb {
+    bool None = 1;
+}
+
+// ---------------------------返回------------------------------ // 
+
+// 返回玩家场景信息
+message RetRoleScene {
+    int32  posX  = 1;
+    int32  posY  = 2;
+    uint32 hp    = 3;
+    uint32 power = 4;
+}
+
+// 返回死亡
+message RetRoleDeath {
+    string killName = 1;  // 被谁杀了
+    uint64 killId   = 2;  // 被谁杀了id
+    uint32 liveTime = 3;  // 存活时间
+    uint32 score    = 4;  // 得分
+}
+
+// 返回统一错误码
+message RetErrorMsgCmd {
+    uint32 RetCode = 1;   // 错误码
+    uint32 Params  = 2;   // 参数
+}
+
+// 炸弹信息
+message MsgBomb {
+    uint32 id           = 1;
+    uint64 own          = 3;
+    int32  x            = 6;
+    int32  y            = 7;
+    bool   isDelete     = 10;
+    uint32 createTime   = 12;
+}
+
+// 场景玩家信息
+message ScenePlayer {
+    uint64 id       = 1;
+    uint32 BombNum  = 2;
+    uint32 power    = 3;
+    uint32 speed    = 4;
+    uint32 state    = 5;
+    float  X        = 6;
+    float  Y        = 7;
+    bool   isMove   = 8;
+}
+
+// 返回客户端场景更新信息
+message RetUpdateSceneMsg {
+    uint64 id   = 1;
+    float  X    = 2;
+    float  Y    = 3;
+
+    repeated ScenePlayer players    = 4;
+    repeated MsgBomb     bombs      = 5;
+}
+
+
