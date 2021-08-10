@@ -38,11 +38,22 @@ func NewScene(room *Room) *Scene {
 		room:    room,
 		players: make(map[uint64]*ScenePlayer),
 	}
-	scene.Init()
+	scene.Init(room)
 	return scene
 }
 
-func (this *Scene) Init() {
+func (this *Scene) Init(room *Room) {
+	// 房间指针
+	this.room = room
+
+	this.players = make(map[uint64]*ScenePlayer)
+
+	this.rangeBalls = this.rangeBalls[:0]
+	this.rangePlayers = this.rangePlayers[:0]
+
+	this.startTime = time.Now()
+
+	
 	this.Obstacle = GenerateRandMap()
 	// Init map
 	this.gameMap = Map{}
