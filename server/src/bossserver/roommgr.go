@@ -102,7 +102,7 @@ func (this *RoomMgr) RemoveRoom(room *Room) {
 	this.AddEndRoomId(room.id)
 	RCenterClient_GetMe().RemoveRoom(room.roomType, room.id, room.iscustom)
 	RCenterClient_GetMe().UpdateServer(this.getNum(), PlayerTaskMgr_GetMe().GetNum())
-	glog.Info("[Room] Remove Room[", room.roomType, ". ", room.id, )
+	glog.Info("[Room] Remove Room[", room.roomType, ". ", room.id)
 }
 
 func (this *RoomMgr) getNum() (roomnum int32) {
@@ -146,8 +146,25 @@ func (this * RoomMgr) getRoomById(rid uint32) *Room {
 }
 
 func (this *RoomMgr) AddPlayer(player *PlayerTask) bool {
+	room := this.getRoomById(player.udata.RoomId)
 
+	if this.IsEndRoom(player.udata.RoomId) {
+		glog.Error("[房间]已结束", player.udata.Id, ", ", player.udata.Account, ", ", player.udata.RoomId)
+		return false
+	}
 
+	if room == nil {
+		room = this.NewRoom(0, player.udata.RoomId, player)
+		if room == nil {
+			return false
+		}
+	}
+	glog.Info("[房间] 自由模式 ", room.id, ", ", player.udata.Id, ", ", player.udata.Account)
+
+	room.IncPlayerNum()
+
+	player.room = room
+	player.room.chan_AddPlayer <- player
 
 	return true
 }
