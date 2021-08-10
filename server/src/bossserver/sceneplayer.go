@@ -218,6 +218,17 @@ func (this *ScenePlayerMgr) GetPlayer(key string) *ScenePlayer {
 	return player
 }
 
+// 删除场景玩家
+func (this *ScenePlayerMgr) Removes(splayers map[uint64]*ScenePlayer) {
+	this.mutex.Lock()
+	for _, player := range splayers {
+		delete(this.players, player.key)
+	}
+	fmt.Println("删除场景玩家")
+	this.mutex.Unlock()
+}
+
+
 ////////////
 func (this *ScenePlayer) Move(scene *Scene, speed, direction float64) {
 
