@@ -21,7 +21,7 @@ type Room struct {
 	isStop      bool
 	iscustom	bool
 	frame 		uint32
-	
+	isclosed  	int32	
 	// Operation
 	scene 			*Scene
 	opChan			chan *opMsg 	// player operation msg
@@ -65,27 +65,47 @@ func NewRoom(rtype, rid uint32, player *PlayerTask) *Room{
 }
 
 func (this *Room) Start()bool{
-
+	
+	if !atomic.CompareAndSwapInt32(&this.isclosed, -1, 0) {
+		return false
+	}
+	// this.rmode = NewFreeRoom(this)
+	
+	// 初始化场景
+	this.Scene.Init(this)
 
 
 
 	return true
 }
 
+// 房间停止
 func (this *Room) Stop() bool {
-
-
+	if !atomic.CompareAndSwapInt32(&this.isclosed, 0, 1) {
+		return false
+	}
+	this.destory()
+	glog.Info("[房间] 销毁房间 ", this.id, ", ", len(this.players))
 
 	return true
 }
 
 func (this *Room) IsClosed() bool {
-
-
-
-	return true
+	return atomic.LoadInt32(&this.isclosed) != 0
 }
 
+// 删除房间
+func (this *Room) destory() {
+	this.Stop()
+	go func(room *Room) {
+		ScenePlayerMgr_GetMe().Removes(room.players)
+
+		// redis 清理玩家
+		// TODO
+
+	}(this)
+	glog.Info("[房间] 结算完成", this.id, ", ", this.GetPlayerNum())
+}
 
 func (this *Room) AddLoginUser(UID uint64) (result bool){
 	this.newLoginMutex.Lock()
@@ -97,6 +117,16 @@ func (this *Room) AddLoginUser(UID uint64) (result bool){
 	}
 	this.newLogin[UID] = true
 	return
+}
+
+// 玩家 +1
+func (this *Room) IncPlayerNum() {
+	atomic.AddInt32(&this.playerNum, 1)
+}
+
+// 返回玩家数
+func (this *Room) GetPlayerNum() int32 {
+	return atomic.LoadInt32(&this.playerNum)
 }
 
 
