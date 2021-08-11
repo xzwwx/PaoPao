@@ -16,7 +16,8 @@ type Scene struct {
 	room     *Room
 	Obstacle *map[uint32]*Obstacle
 
-	gameMap Map
+	gameMap *Map
+	objects *Objects
 	// Scene info
 	sceneWidth  float64
 	sceneHeight float64
@@ -29,7 +30,7 @@ type Scene struct {
 	msgBytes []byte
 	// temple things
 	rangeBalls     []*Bomb //map
-	rangePlayers   []*ScenePlayer
+	// rangePlayers   []*ScenePlayer
 	rangeObstacles []*Obstacle
 }
 
@@ -82,11 +83,17 @@ func (this *Scene) UpdatePlayers(per float64) {
 
 }
 
-// Check mapcell   0: null  1:wall  2:Obstacle
-func (this *Scene) GetCellState(x, y float64) int32 {
+// Check mapcell   0: null  1:wall  2:Obstacle 3: 道具
+func (this *Scene) GetCellState(x, y uint32) int32 {
 
 	return this.gameMap.gamemap[x][y]
 }
+
+// Check mapcell   0: null  1:wall  2:Obstacle 3: 道具
+func (this *Scene) GetObjType(x, y int32) int32 {
+	return this.objects.obj[x][y]
+}
+
 
 // 保证位置不超出地图范围
 func (this *Scene) BorderCheck(pos *Vector2) {
