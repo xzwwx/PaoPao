@@ -1,10 +1,13 @@
 package main
 
 import (
+	"common"
 	"glog"
 	"math"
 	"sync"
+	"sync/atomic"
 	"time"
+	"usercmd"
 )
 
 type Room struct {
@@ -13,7 +16,7 @@ type Room struct {
 	id          uint32                 //房间id
 	roomType    uint32                 //房间类型
 	players     map[uint64]*PlayerTask //房间内的玩家
-	curNum      uint32                 //当前房间内玩家数
+	playerNum      uint32                 //当前房间内玩家数
 	bombCount 	uint32
 	isStart     bool
 	timeLoop    uint64
@@ -29,6 +32,11 @@ type Room struct {
 	chan_Control 	chan int
 	chan_AddPlayer 		chan *PlayerTask
 	chan_RemovePlayer 	chan *PlayerTask
+
+	rmode RoomMode
+
+	// 处理炸弹
+	bombmgr *BombMgr
 
 
 	newLogin 	map[uint64]bool
@@ -57,6 +65,10 @@ type opMsg struct {
 //	Opts		*UserOpt
 //}
 
+type RoomMode interface {
+	LoadData() bool
+}
+
 func NewRoom(rtype, rid uint32, player *PlayerTask) *Room{
 	room := &Room{
 
@@ -71,9 +83,11 @@ func (this *Room) Start()bool{
 	}
 	// this.rmode = NewFreeRoom(this)
 	
-	// 初始化场景
+	this.bombmgr = NewBombMgr(this)
 	this.Scene.Init(this)
 
+	go this.Loop()
+	glog.Info("[房间] 创建房间 ", ", ", this.id, ", ")
 
 
 	return true
@@ -209,6 +223,19 @@ func (this *Room) TimeAction() {
 
 }
 
+//广播消息
+func (this *Room) BroadcastMsg(msgNo usercmd.MsgTypeCmd, msg common.Message) {
+	data, ok := common.EncodeToBytes(uint16(msgNo), msg)
+	if !ok {
+		glog.Error("[广播] 发送消息失败 ", msgNo)
+		return
+	}
+	for _, player := range this.Scene.players {
+		player.AsyncSend(data, 0)
+	}
+}
+
+
 //Send cmd to room pthread
 func (this *Room) Control(ctrl int) bool {
 	if this.IsClosed() {
@@ -220,7 +247,7 @@ func (this *Room) Control(ctrl int) bool {
 }
 
 //Lay bomb
-func (this *Room) LayBomb(playerId uint64) {
+func (this *Room) LayBomb2(playerId uint64) {
 	player, ok := this.players[playerId]
 	if !ok {
 		return
@@ -229,5 +256,14 @@ func (this *Room) LayBomb(playerId uint64) {
 
 }
 
+//Lay bomb
+func (this *Room) LayBomb(playerId uint64, x, y int32) {
+	player, ok := this.players[playerId]
+	if !ok {
+		return
+	}
+	player.LayBomb(this, x, y)
+
+}
 
 
