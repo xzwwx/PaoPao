@@ -70,6 +70,9 @@ type PlayerOp struct {
 	opType 		PlayerOpType
 	loginUsers 	map[uint64]bool
 	toPlayerId 	uint64
+	opTime     uint64
+	x          int32
+	y          int32
 }
 
 func NewPlayerTask(conn net.Conn) *PlayerTask{
@@ -164,6 +167,11 @@ func (this *PlayerTask) ParseMsg(data []byte, flag byte) bool {
 		if common.DecodeGoCmd(data, flag, revCmd) != nil {
 			return false
 		}
+		
+		if revCmd.Speed == 0 {
+			revCmd.Speed = this.speed
+		}
+
 
 		atomic.StoreInt32(&this.direction, revCmd.Direction)
 		atomic.StoreInt32(&this.speed, revCmd.Speed)
@@ -185,7 +193,8 @@ func (this *PlayerTask) ParseMsg(data []byte, flag byte) bool {
 		if this.lastLayBomb > OpsPerSecond {
 			return true
 		}
-		this.room.chan_PlayerOp <- &PlayerOp{playerId: this.id, cmdParam: 0, opType: PlayerLayBombOp}
+		revCmd := &usercmd.MsgLayBomb{}
+		this.room.chan_PlayerOp <- &PlayerOp{playerId: this.id, cmdParam: 0, opType: PlayerLayBombOp, opTime: uint64(revCmd.LayTime), x: int32(revCmd.X), y: int32(revCmd.Y)}
 
 		fmt.Println("Lay Bomb++", this.id)
 
